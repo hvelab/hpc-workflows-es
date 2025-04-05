@@ -1,13 +1,14 @@
 ---
-title: "Chaining rules"
+title: Encadenamiento de reglas
 teaching: 40
 exercises: 30
 ---
 
+
 ::: questions
 
-- "How do I combine rules into a workflow?"
-- "How do I make a rule with multiple inputs and outputs?"
+- "¿Cómo combino reglas en un flujo de trabajo?"
+- "¿Cómo hago una regla con múltiples entradas y salidas?"
 
 :::
 
@@ -17,23 +18,17 @@ exercises: 30
 
 :::
 
-## A pipeline of multiple rules
+## Una cadena de múltiples reglas
 
-We now have a rule that can generate output for any value of `-p` and any number
-of tasks, we just need to call Snakemake with the parameters that we want:
+Ahora tenemos una regla que puede generar una salida para cualquier valor de `-p` y cualquier número de tareas, sólo tenemos que llamar a Snakemake con los parámetros que queremos:
 
 ```bash
 snakemake --profile cluster_profile p_0.999/runs/amdahl_run_6.json
 ```
 
-That's not exactly convenient though, to generate a full dataset we have to run
-Snakemake lots of times with different output file targets. Rather than that,
-let's create a rule that can generate those files for us.
+Aunque eso no es exactamente conveniente, para generar un conjunto de datos completo tenemos que ejecutar Snakemake muchas veces con diferentes objetivos de archivos de salida. En lugar de eso, vamos a crear una regla que puede generar los archivos para nosotros.
 
-Chaining rules in Snakemake is a matter of choosing filename patterns that
-connect the rules.
-There's something of an art to it - most times there are several options that
-will work:
+Encadenar reglas en Snakemake es cuestión de elegir patrones de nombres de archivos que conecten las reglas. Hay algo de arte en ello - la mayoría de las veces hay varias opciones que funcionarán:
 
 ```python
 rule generate_run_files:
@@ -45,13 +40,11 @@ rule generate_run_files:
 
 ::: challenge
 
-The new rule is doing no work, it's just making sure we create the file we want.
-It's not worth executing on the cluster. How do ensure it runs on the login node
-only?
+La nueva regla no está haciendo ningún trabajo, sólo se está asegurando de que creamos el archivo que queremos. No vale la pena ejecutarla en el cluster. ¿Cómo asegurarse de que se ejecuta sólo en el nodo de inicio de sesión?
 
 :::::: solution
 
-We need to add the new rule to our `localrules`:
+Necesitamos añadir la nueva regla a nuestro `localrules`:
 
 ```python
 localrules: hostname_login, generate_run_files
@@ -61,8 +54,7 @@ localrules: hostname_login, generate_run_files
 
 :::
 
-Now let's run the new rule (remember we need to request the output file by name
-as the `output` in our rule contains a wildcard pattern):
+Ahora vamos a ejecutar la nueva regla (recuerda que tenemos que solicitar el archivo de salida por su nombre ya que `output` en nuestra regla contiene un patrón comodín):
 
 ```bash
 [ocaisa@node1 ~]$ snakemake --profile cluster_profile/ p_0.999_runs.txt
@@ -121,71 +113,46 @@ Finished job 0.
 Complete log: .snakemake/log/2024-01-30T173929.781106.snakemake.log
 ```
 
-Look at the logging messages that Snakemake prints in the terminal.
-What has happened here?
+Mira los mensajes de registro que Snakemake imprime en la terminal. ¿Qué ha ocurrido aquí?
 
-1. Snakemake looks for a rule to make `p_0.999_runs.txt`
-1. It determines that "generate_run_files" can make this if
-   `parallel_proportion=0.999`
-1. It sees that the input needed is therefore `p_0.999/runs/amdahl_run_6.json`
-1. Snakemake looks for a rule to make `p_0.999/runs/amdahl_run_6.json`
-1. It determines that "amdahl_run" can make this if `parallel_proportion=0.999`
-   and `parallel_tasks=6`
-1. Now Snakemake has reached an available input file (in this case, no input
-   file is actually required), it runs both steps to get the final output
+1. Snakemake busca una regla para hacer `p_0.999_runs.txt`
+1. Determina que "generate_run_files" puede hacer esto si `parallel_proportion=0.999`
+1. Por lo tanto, ve que la entrada necesaria es `p_0.999/runs/amdahl_run_6.json`
+1. Snakemake busca una regla para hacer `p_0.999/runs/amdahl_run_6.json`
+1. Determina que "amdahl_run" puede hacer esto si `parallel_proportion=0.999` y `parallel_tasks=6`
+1. Ahora que Snakemake ha alcanzado un archivo de entrada disponible (en este caso, no se requiere ningún archivo de entrada), ejecuta ambos pasos para obtener la salida final
 
-This, in a nutshell, is how we build workflows in Snakemake.
+Así, en pocas palabras, es como construimos flujos de trabajo en Snakemake.
 
-1. Define rules for all the processing steps
-1. Choose `input` and `output` naming patterns that allow Snakemake to link the
-   rules
-1. Tell Snakemake to generate the final output file(s)
+1. Definir reglas para todos los pasos de procesamiento
+1. Elija `input` y `output` patrones de nomenclatura que permitan a Snakemake vincular las reglas
+1. Indicar a Snakemake que genere los archivos de salida finales
 
-If you are used to writing regular scripts this takes a little
-getting used to. Rather than listing steps in order of execution, you are alway
-**working backwards** from the final desired result. The order of operations is
-determined by applying the pattern matching rules to the filenames, not by the
-order of the rules in the Snakefile.
+Si usted está acostumbrado a escribir scripts regulares esto toma un poco de tiempo para acostumbrarse. En lugar de enumerar los pasos en orden de ejecución, siempre se está **trabajando hacia atrás** desde el resultado final deseado. El orden de las operaciones viene determinado por la aplicación de las reglas de concordancia de patrones a los nombres de archivo, no por el orden de las reglas en el archivo Snakefile.
 
 ::: callout
 
-## Outputs first?
+## ¿Salidas primero?
 
-The Snakemake approach of working backwards from the desired output to determine
-the workflow is why we're putting the `output` lines first in all our rules - to
-remind us that these are what Snakemake looks at first!
+El enfoque de Snakemake de trabajar hacia atrás desde la salida deseada para determinar el flujo de trabajo es la razón por la que estamos poniendo las líneas `output` primero en todas nuestras reglas - ¡para recordarnos que esto es lo que Snakemake mira primero!
 
-Many users of Snakemake, and indeed the official documentation, prefer to have
-the `input` first, so in practice you should use whatever order makes sense to
-you.
-
-:::
-
-::: callout 
-
-## `log` outputs in Snakemake
-
-Snakemake has a dedicated rule field for outputs that are
-[log files](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files),
-and these are mostly treated as regular outputs except that log files are not
-removed if the job produces an error. This means you can look at the log to help
-diagnose the error. In a real workflow this can be very useful, but in terms of
-learning the fundamentals of Snakemake we'll stick with regular `input` and
-`output` fields here.
+Muchos usuarios de Snakemake, y de hecho la documentación oficial, prefieren tener el `input` primero, por lo que en la práctica se debe utilizar cualquier orden que tenga sentido para usted.
 
 :::
 
 ::: callout
 
-## Errors are normal
+## `log` salidas en Snakemake
 
-Don't be disheartened if you see errors when first testing
-your new Snakemake pipelines. There is a lot that can go wrong when writing a
-new workflow, and you'll normally need several iterations to get things just
-right. One advantage of the Snakemake approach compared to regular scripts is
-that Snakemake fails fast when there is a problem, rather than ploughing on
-and potentially running junk calculations on partial or corrupted data. Another
-advantage is that when a step fails we can safely resume from where we left off.
+Snakemake tiene un campo de regla dedicado para las salidas que son [archivos de registro](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files), y estos son tratados en su mayoría como salidas regulares, excepto que los archivos de registro no se eliminan si el trabajo produce un error. Esto significa que usted puede mirar el registro para ayudar a diagnosticar el error. En un flujo de trabajo real esto puede ser muy útil, pero en términos de aprendizaje de los fundamentos de Snakemake nos quedaremos con los campos regulares `input` y `output` aquí.
+
+:::
+
+::: callout
+
+## Los errores son normales
+
+No te desanimes si ves errores cuando pruebes por primera vez tus nuevos pipelines de Snakemake. Hay muchas cosas que pueden salir mal al escribir un nuevo flujo de trabajo, y normalmente necesitarás varias iteraciones para hacer las cosas bien. Una ventaja del enfoque de Snakemake en comparación con los scripts regulares es que Snakemake falla rápidamente cuando hay un problema, en lugar de seguir adelante y potencialmente ejecutar cálculos basura sobre datos parciales o corruptos. Otra ventaja es que cuando un paso falla, podemos reanudarlo con seguridad desde donde lo dejamos.
 
 :::
 
@@ -193,10 +160,10 @@ advantage is that when a step fails we can safely resume from where we left off.
 
 ::: keypoints
 
-- "Snakemake links rules by iteratively looking for rules that make missing
-  inputs"
-- "Rules may have multiple named inputs and/or outputs"
-- "If a shell command does not yield an expected output then Snakemake will
-  regard that as a failure"
+- "Snakemake enlaza reglas buscando iterativamente reglas que tengan entradas faltantes"
+- "Las reglas pueden tener múltiples entradas y/o salidas con nombre"
+- "Si un comando del shell no produce una salida esperada entonces Snakemake lo considerará como un fallo"
 
 :::
+
+

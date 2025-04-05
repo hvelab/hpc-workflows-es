@@ -1,27 +1,25 @@
 ---
-title: "Processing lists of inputs"
+title: Procesamiento de listas de entradas
 teaching: 50
 exercises: 30
 ---
 
+
 ::: questions
 
-- "How do I process multiple files at once?"
-- "How do I combine multiple files together?"
+- "¿Cómo puedo procesar varios archivos a la vez?"
+- "¿Cómo combino varios archivos?"
 
 :::
 
 ::: objectives
 
-- "Use Snakemake to process all our samples at once"
-- "Make a scalability plot that brings our results together"
+- "Usa Snakemake para procesar todas nuestras muestras a la vez"
+- "Haz un gráfico de escalabilidad que agrupe nuestros resultados"
 
 :::
 
-We created a rule that can generate a single output file, but we're not going to
-create multiple rules for every output file. We want to generate all of the run
-files with a single rule if we could, well Snakemake can indeed take a list of
-input files:
+Hemos creado una regla que puede generar un único archivo de salida, pero no vamos a crear varias reglas para cada archivo de salida. Queremos generar todos los archivos de ejecución con una sola regla si pudiéramos, bueno Snakemake puede efectivamente tomar una lista de archivos de entrada:
 
 ```python
 rule generate_run_files:
@@ -31,35 +29,27 @@ rule generate_run_files:
         "echo {input} done > {output}"
 ```
 
-That's great, but we don't want to have to list all of the files we're
-interested in individually. How can we do this?
+Eso está muy bien, pero no queremos tener que listar todos los archivos que nos interesan individualmente. ¿Cómo podemos hacerlo?
 
-## Defining a list of samples to process
+## Definición de una lista de muestras a procesar
 
-To do this, we can define some lists as Snakemake **global variables**.
+Para ello, podemos definir algunas listas como **variables globales** de Snakemake.
 
-Global variables should be added before the rules in the Snakefile.
+Las variables globales deben añadirse antes de las reglas en el Snakefile.
 
 ```python
 # Task sizes we wish to run
 NTASK_SIZES = [1, 2, 3, 4, 5]
 ```
 
-- Unlike with variables in shell scripts, we can put spaces around the `=` sign,
-  but they are not mandatory.
-- The lists of quoted strings are enclosed in square brackets and
-  comma-separated. If you know any Python you'll recognise this as Python list
-  syntax.
-- A good convention is to use capitalized names for these variables, but this is
-  not mandatory.
-- Although these are referred to as variables, you can't actually change the
-  values once the workflow is running, so lists defined this way are more like
-  constants.
+- A diferencia de lo que ocurre con las variables en los scripts de shell, podemos poner espacios alrededor del signo `=`, pero no son obligatorios.
+- Las listas de cadenas entrecomilladas van entre corchetes y separadas por comas. Si sabes algo de Python reconocerás esto como sintaxis de listas de Python.
+- Una buena convención es utilizar nombres en mayúsculas para estas variables, pero no es obligatorio.
+- Aunque éstas se denominan variables, en realidad no se pueden cambiar los valores una vez que el flujo de trabajo se está ejecutando, por lo que las listas definidas de esta manera son más como constantes.
 
-## Using a Snakemake rule to define a batch of outputs
+## Usando una regla de Snakemake para definir un lote de salidas
 
-Now let's update our Snakefile to leverage the new global variable and create a
-list of files:
+Ahora vamos a actualizar nuestro Snakefile para aprovechar la nueva variable global y crear una lista de archivos:
 
 ```python
 rule generate_run_files:
@@ -69,60 +59,41 @@ rule generate_run_files:
         "echo {input} done > {output}"
 ```
 
-The `expand(...)` function in this rule generates a list of filenames, by taking
-the first thing in the single parentheses as a template and replacing `{count}`
-with all the `NTASK_SIZES`. Since there are 5 elements in the list, this will
-yield 5 files we want to make. Note that we had to protect our wildcard in a
-second set of parentheses so it wouldn't be interpreted as something that needed
-to be expanded.
+La función `expand(...)` de esta regla genera una lista de nombres de archivo, tomando como plantilla lo primero que aparece entre paréntesis y sustituyendo `{count}` por todos los `NTASK_SIZES`. Dado que hay 5 elementos en la lista, esto producirá 5 archivos que queremos hacer. Tenga en cuenta que tuvimos que proteger nuestro comodín en un segundo conjunto de paréntesis para que no fuera interpretado como algo que necesitaba ser expandido.
 
-In our current case we still rely on the file name to define the value of the
-wildcard `parallel_proportion` so we can't call the rule directly, we still need
-to request a specific file:
+En nuestro caso actual seguimos dependiendo del nombre de fichero para definir el valor del comodín `parallel_proportion`, por lo que no podemos llamar a la regla directamente, seguimos necesitando solicitar un fichero específico:
 
 ```bash
 snakemake --profile cluster_profile/ p_0.999_runs.txt
 ```
 
-If you don't specify a target rule name or any file names on the command line
-when running Snakemake, the default is to use **the first rule** in the
-Snakefile as the target.
+Si no especifica un nombre de regla de destino o cualquier nombre de archivo en la línea de comandos cuando se ejecuta Snakemake, el valor predeterminado es utilizar ** la primera regla ** en el Snakefile como el objetivo.
 
 ::: callout
-## Rules as targets
 
-Giving the name of a rule to Snakemake on the command line only works when that
-rule has *no wildcards* in the outputs, because Snakemake has no way to know
-what the desired wildcards might be. You will see the error "Target rules may
-not contain wildcards." This can also happen when you don't supply any explicit
-targets on the command line at all, and Snakemake tries to runthe first rule
-defined in the Snakefile.
+## Reglas como destinos
+
+Dar el nombre de una regla a Snakemake en la línea de comandos sólo funciona cuando esa regla tiene *sin comodines* en las salidas, porque Snakemake no tiene forma de saber cuáles podrían ser los comodines deseados. Verá el error "Las reglas de destino no pueden contener comodines" Esto también puede ocurrir cuando no se proporciona ningún objetivo explícito en la línea de comandos, y Snakemake intenta ejecutar la primera regla definida en el archivo Snakefile.
 
 :::
 
-## Rules that combine multiple inputs
+## Reglas que combinan varias entradas
 
-Our `generate_run_files` rule is a rule which takes a list of input files. The
-length of that list is not fixed by the rule, but can change based on
-`NTASK_SIZES`.
+Nuestra regla `generate_run_files` es una regla que toma una lista de archivos de entrada. La longitud de esa lista no está fijada por la regla, sino que puede cambiar en función de `NTASK_SIZES`.
 
-In our workflow the final step is to take all the generated files and combine
-them into a plot. To do that, you may have heard that some people use a python
-library called `matplotlib`. It's beyond the scope of this tutorial to write
-the python script to create a final plot, so we provide you with the script as
-part of this lesson. You can download it with
+En nuestro flujo de trabajo el paso final es tomar todos los archivos generados y combinarlos en un gráfico. Para ello, es posible que haya oído que algunas personas utilizan una biblioteca de Python llamada `matplotlib`. Está más allá del alcance de este tutorial escribir el script de python para crear un gráfico final, así que te proporcionamos el script como parte de esta lección. Puede descargarlo con
 
 ```bash
 curl -O https://ocaisa.github.io/hpc-workflows/files/plot_terse_amdahl_results.py
 ```
 
-The script `plot_terse_amdahl_results.py` needs a command line that looks like:
+El script `plot_terse_amdahl_results.py` necesita una línea de comandos parecida a:
 
 ```bash
 python plot_terse_amdahl_results.py --output <output image filename> <1st input file> <2nd input file> ...
 ```
 
-Let's introduce that into our `generate_run_files` rule:
+Introduzcámoslo en nuestra regla `generate_run_files`:
 
 ```python
 rule generate_run_files:
@@ -134,8 +105,7 @@ rule generate_run_files:
 
 ::: challenge
 
-This script relies on `matplotlib`, is it available as an environment module?
-Add this requirement to our rule.
+Este script depende de `matplotlib`, ¿está disponible como módulo de entorno? Añada este requisito a nuestra regla.
 
 :::::: solution
 
@@ -153,7 +123,7 @@ rule generate_run_files:
 
 :::
 
-Now we finally get to generate a scaling plot! Run the final Snakemake command:
+¡Por fin podemos generar un gráfico de escala! Ejecute el último comando de Snakemake:
 
 ```bash
 snakemake --profile cluster_profile/ p_0.999_scalability.jpg
@@ -161,7 +131,7 @@ snakemake --profile cluster_profile/ p_0.999_scalability.jpg
 
 ::: challenge
 
-Generate the scalability plot for all values from 1 to 10 cores.
+Genera el gráfico de escalabilidad para todos los valores de 1 a 10 núcleos.
 
 :::::: solution
 
@@ -175,7 +145,7 @@ NTASK_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 ::: challenge
 
-Rerun the workflow for a `p` value of 0.8
+Vuelva a ejecutar el flujo de trabajo para un valor `p` de 0.8
 
 :::::: solution
 
@@ -189,15 +159,17 @@ snakemake --profile cluster_profile/ p_0.8_scalability.jpg
 
 ::: challenge
 
-## Bonus round
+## Ronda de bonificación
 
-Create a final rule that can be called directly and generates a scaling plot for
-3 different values of `p`.
+Cree una regla final que pueda llamarse directamente y genere un gráfico de escala para 3 valores diferentes de `p`.
+
 :::
 
 ::: keypoints
 
-- "Use the `expand()` function to generate lists of filenames you want to combine"
-- "Any `{input}` to a rule can be a variable-length list"
+- "Utilice la función `expand()` para generar listas de nombres de archivo que desee combinar"
+- "Cualquier `{input}` de una regla puede ser una lista de longitud variable"
 
 :::
+
+

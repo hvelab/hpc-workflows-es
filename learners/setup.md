@@ -1,29 +1,26 @@
 ---
-title: Setup
+title: Configurar
 ---
 
-FIXME: Setup instructions live in this document. Please specify the tools and
-the data sets the Learner needs to have installed.
 
-## Data Sets
+FIXME: Las instrucciones de instalación se encuentran en este documento. Por favor, especifique las herramientas y los conjuntos de datos que el alumno necesita tener instalados.
+
+## Conjuntos de datos
 
 <!--
 FIXME: place any data you want learners to use in `episodes/data` and then use
        a relative link ( [data zip file](data/lesson-data.zip) ) to provide a
        link to it, replacing the example.com link.
 -->
-Download the [data zip file](https://example.com/FIXME) and unzip it to your Desktop
+Descargue el [archivo zip de datos](https://example.com/FIXME) y descomprímalo en su Escritorio
 
-## Software Setup
+## Configuración del software
 
 ::::::::::::::::::::::::::::::::::::::: discussion
 
-### Details
+### Detalles
 
-Setup for different systems can be presented in dropdown menus via a `solution`
-tag. They will join to this discussion block, so you can give a general overview
-of the software used in this lesson here and fill out the individual operating
-systems (and potentially add more, e.g. online setup) in the solutions blocks.
+La configuración para diferentes sistemas puede presentarse en menús desplegables mediante una etiqueta `solution`. Se unirán a este bloque de discusión, por lo que puede dar una visión general del software utilizado en esta lección aquí y rellenar los sistemas operativos individuales (y potencialmente añadir más, por ejemplo, configuración en línea) en los bloques de soluciones.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -31,7 +28,7 @@ systems (and potentially add more, e.g. online setup) in the solutions blocks.
 
 ### Windows
 
-Use PuTTY
+Utilice PuTTY
 
 :::::::::::::::::::::::::
 
@@ -39,7 +36,7 @@ Use PuTTY
 
 ### MacOS
 
-Use Terminal.app
+Utilice Terminal.app
 
 :::::::::::::::::::::::::
 
@@ -48,7 +45,8 @@ Use Terminal.app
 
 ### Linux
 
-Use Terminal
+Usar Terminal
 
 :::::::::::::::::::::::::
+
 

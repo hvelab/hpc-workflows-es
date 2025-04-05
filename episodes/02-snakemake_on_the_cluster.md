@@ -1,28 +1,25 @@
 ---
-title: "Running Snakemake on the cluster"
+title: Ejecutando Snakemake en el cluster
 teaching: 30
 exercises: 20
 ---
 
+
 ::: objectives
 
-- "Define rules to run locally and on the cluster"
+- "Define reglas para ejecutar localmente y en el cluster"
 
 :::
 
 ::: questions
 
-- "How do I run my Snakemake rule on the cluster?"
+- "¿Cómo ejecuto mi regla de Snakemake en el cluster?"
 
 :::
 
-What happens when we want to make our rule run on the cluster rather than the
-login node? The cluster we are using uses Slurm, and it happens that Snakemake
-has built in support for Slurm, we just need to tell it that we want to use it.
+¿Qué ocurre cuando queremos que nuestra regla se ejecute en el cluster en lugar de en el nodo de inicio de sesión? El cluster que estamos usando utiliza Slurm, y sucede que Snakemake tiene soporte integrado para Slurm, solo necesitamos decirle que queremos usarlo.
 
-Snakemake uses the `executor` option to allow you to select the plugin that you
-wish to execute the rule. The quickest way to apply this to your Snakefile is to
-define this on the command line. Let's try it out
+Snakemake utiliza la opción `executor` para permitirte seleccionar el plugin que deseas que ejecute la regla. La forma más rápida de aplicar esto a tu Snakefile es definirlo en la línea de comandos. Vamos a probarlo
 
 ```bash
 [ocaisa@node1 ~]$ snakemake -j1 -p --executor slurm hostname_login
@@ -34,30 +31,25 @@ Retrieving input from storage.
 Nothing to be done (all requested files are present and up to date).
 ```
 
-Nothing happened! Why not? When it is asked to build a target, Snakemake checks
-the 'last modification time' of both the target and its dependencies. If any
-dependency has been updated since the target, then the actions are re-run to
-update the target. Using this approach, Snakemake knows to only rebuild the
-files that, either directly or indirectly, depend on the file that changed. This
-is called an _incremental build_.
+¡No ha pasado nada! ¿Por qué? Cuando se le pide que construya un objetivo, Snakemake comprueba la 'última hora de modificación' tanto del objetivo como de sus dependencias. Si alguna dependencia ha sido actualizada desde el objetivo, entonces las acciones se vuelven a ejecutar para actualizar el objetivo. Usando este enfoque, Snakemake sabe que sólo debe reconstruir los archivos que, directa o indirectamente, dependen del archivo que cambió. Esto se llama una _construcción incremental_.
 
 ::: callout
-## Incremental Builds Improve Efficiency
 
-By only rebuilding files when required, Snakemake makes your processing
-more efficient.
+## Las construcciones incrementales mejoran la eficiencia
+
+Al reconstruir los archivos sólo cuando es necesario, Snakemake hace que su procesamiento sea más eficiente.
+
 :::
 
 ::: challenge
-## Running on the cluster
 
-We need another rule now that executes the `hostname` on the _cluster_. Create
-a new rule in your Snakefile and try to execute it on cluster with the option
-`--executor slurm` to `snakemake`.
+## Ejecutando en el cluster
+
+Ahora necesitamos otra regla que ejecute el `hostname` en el _cluster_. Crea una nueva regla en tu Snakefile e intenta ejecutarla en el cluster con la opción `--executor slurm` a `snakemake`.
 
 :::::: solution
-The rule is almost identical to the previous rule save for the rule name and
-output file:
+
+La regla es casi idéntica a la regla anterior excepto por el nombre de la regla y el archivo de salida:
 
 ```python
 rule hostname_remote:
@@ -67,7 +59,7 @@ rule hostname_remote:
         "hostname > hostname_remote.txt"
 ```
 
-You can then execute the rule with
+A continuación, puede ejecutar la regla con
 
 ```bash
 [ocaisa@node1 ~]$ snakemake -j1 -p --executor slurm hostname_remote
@@ -109,10 +101,7 @@ Finished job 0.
 Complete log: .snakemake/log/2024-01-29T180346.788174.snakemake.log
 ```
 
-Note all the warnings that Snakemake is giving us about the fact that the rule
-may not be able to execute on our cluster as we may not have given enough
-information. Luckily for us, this actually works on our cluster and we can take
-a look in the output file the new rule creates, `hostname_remote.txt`:
+Observe todas las advertencias que Snakemake nos está dando sobre el hecho de que la regla puede no ser capaz de ejecutarse en nuestro cluster ya que puede que no hayamos dado suficiente información. Por suerte para nosotros, esto funciona en nuestro cluster y podemos echar un vistazo al archivo de salida que crea la nueva regla, `hostname_remote.txt`:
 
 ```bash
 [ocaisa@node1 ~]$ cat hostname_remote.txt
@@ -126,20 +115,15 @@ tmpnode1.int.jetstream2.hpc-carpentry.org
 
 :::
 
-## Snakemake profile
+## Perfil de Snakemake
 
-Adapting Snakemake to a particular environment can entail many flags and
-options. Therefore, it is possible to specify a configuration profile to be used
-to obtain default options. This looks like
+Adaptar Snakemake a un entorno particular puede implicar muchas banderas y opciones. Por lo tanto, es posible especificar un perfil de configuración que se utilizará para obtener las opciones por defecto. Esto se parece a
 
 ```bash
 snakemake --profile myprofileFolder ...
 ```
 
-The profile folder must contain a file called `config.yaml` which is what will
-store our options. The folder may also contain other files necessary for the
-profile. Let's create the file `cluster_profile/config.yaml` and insert some of
-our existing options:
+La carpeta del perfil debe contener un archivo llamado `config.yaml` que es el que almacenará nuestras opciones. La carpeta también puede contener otros archivos necesarios para el perfil. Vamos a crear el archivo `cluster_profile/config.yaml` e insertar algunas de nuestras opciones existentes:
 
 ```yaml
 printshellcmds: True
@@ -147,24 +131,17 @@ jobs: 3
 executor: slurm
 ```
 
-We should now be able rerun our workflow by pointing to the profile rather than
-the listing out the options. To force our workflow to rerun, we first need to
-remove the output file `hostname_remote.txt`, and then we can try out our new
-profile
+Ahora debemos ser capaces de volver a ejecutar nuestro flujo de trabajo apuntando al perfil en lugar de la lista de las opciones. Para obligar a nuestro flujo de trabajo a volver a ejecutarse, primero tenemos que eliminar el archivo de salida `hostname_remote.txt`, y luego podemos probar nuestro nuevo perfil
 
 ```bash
 [ocaisa@node1 ~]$ rm hostname_remote.txt
 [ocaisa@node1 ~]$ snakemake --profile cluster_profile hostname_remote
 ```
 
-The profile is extremely useful in the context of our cluster, as the Slurm
-executor has lots of options, and sometimes you need to use them to be able to
-submit jobs to the cluster you have access to. Unfortunately, the names of the
-options in Snakemake are not _exactly_ the same as those of Slurm, so we need
-the help of a translation table:
+El perfil es extremadamente útil en el contexto de nuestro cluster, ya que el ejecutor Slurm tiene muchas opciones, y a veces necesitas usarlas para poder enviar trabajos al cluster al que tienes acceso. Desafortunadamente, los nombres de las opciones en Snakemake no son _exactamente_ los mismos que los de Slurm, por lo que necesitamos la ayuda de una tabla de traducción:
 
 | SLURM             | Snakemake         | Description                                                    |
-|-------------------|-------------------|----------------------------------------------------------------|
+| ----------------- | ----------------- | -------------------------------------------------------------- |
 | `--partition`     | `slurm_partition` | the partition a rule/job is to use                             |
 | `--time`          | `runtime`         | the walltime per job in minutes                                |
 | `--constraint`    | `constraint`      | may hold features on some clusters                             |
@@ -175,10 +152,7 @@ the help of a translation table:
 | `--cpus-per-task` | `cpus_per_task`   | number of cpus per task (in case of SMP, rather use `threads`) |
 | `--nodes`         | `nodes`           | number of nodes                                                |
 
-The warnings given by Snakemake hinted that we may need to provide these
-options. One way to do it is to provide them is as part of the Snakemake rule
-using the keyword `resources`,
-e.g.,
+Las advertencias dadas por Snakemake dieron a entender que podríamos necesitar proporcionar estas opciones. Una forma de hacerlo es proporcionarlas como parte de la regla de Snakemake utilizando la palabra clave `resources`, por ejemplo,
 
 ```python
 rule:
@@ -189,10 +163,7 @@ rule:
         runtime = <some number>
 ```
 
-and we can also use the profile to define default values for these options to
-use with our project, using the keyword `default-resources`. For example, the
-available memory on our cluster is about 4GB per core, so we can add that to our
-profile:
+y también podemos usar el perfil para definir valores por defecto para estas opciones para usar con nuestro proyecto, usando la palabra clave `default-resources`. Por ejemplo, la memoria disponible en nuestro cluster es de unos 4GB por núcleo, así que podemos añadir eso a nuestro perfil:
 
 ```yaml
 printshellcmds: True
@@ -203,8 +174,8 @@ default-resources:
 ```
 
 :::challenge
-We know that our problem runs in a very short time. Change the default length of
-our jobs to two minutes for Slurm.
+
+Sabemos que nuestro problema se ejecuta en muy poco tiempo. Cambia la duración por defecto de nuestros trabajos a dos minutos para Slurm.
 
 ::::::solution
 
@@ -221,9 +192,7 @@ default-resources:
 
 :::
 
-There are various `sbatch` options not directly supported by the resource
-definitions in the table above. You may use the `slurm_extra` resource to
-specify any of these additional flags to `sbatch`:
+Existen varias opciones `sbatch` no soportadas directamente por las definiciones de recursos de la tabla anterior. Puede utilizar el recurso `slurm_extra` para especificar cualquiera de estas opciones adicionales a `sbatch`:
 
 ```python
 rule myrule:
@@ -233,22 +202,11 @@ rule myrule:
         slurm_extra="--mail-type=ALL --mail-user=<your email>"
 ```
 
-## Local rule execution
+## Ejecución local de reglas
 
-Our initial rule was to
-get the hostname of the login node. We always want to run that rule on the login
-node for that to make sense. If we tell Snakemake to run all rules via the
-Slurm executor (which is what we are doing via our new profile) this
-won't happen any more. So how do we force the rule to run on
-the login node?
+Nuestra regla inicial era obtener el nombre de host del nodo de inicio de sesión. Siempre queremos ejecutar esa regla en el nodo de inicio de sesión para que tenga sentido. Si le decimos a Snakemake que ejecute todas las reglas a través del ejecutor Slurm (que es lo que estamos haciendo a través de nuestro nuevo perfil) esto ya no sucederá. Entonces, ¿cómo forzamos la regla para que se ejecute en el nodo de inicio de sesión?
 
-Well, in the case where a Snakemake rule performs a trivial task job submission
-might be overkill (e.g., less than 1 minute worth of compute time). Similar to
-our case, it would be a better
-idea to have these rules execute locally (i.e. where the `snakemake` command is
-run) instead of as a job. Snakemake lets you indicate which rules should always
-run locally with the `localrules` keyword. Let's define `hostname_login` as a
-local rule near the top of our `Snakefile`.
+Bueno, en el caso de que una regla de Snakemake realice una tarea trivial, el envío de trabajos podría ser excesivo (por ejemplo, menos de 1 minuto de tiempo de computación). Similar a nuestro caso, sería una mejor idea hacer que estas reglas se ejecuten localmente (es decir, donde se ejecuta el comando `snakemake`) en lugar de como un trabajo. Snakemake le permite indicar qué reglas deben ejecutarse siempre localmente con la palabra clave `localrules`. Vamos a definir `hostname_login` como una regla local cerca de la parte superior de nuestro `Snakefile`.
 
 ```python
 localrules: hostname_login
@@ -256,8 +214,10 @@ localrules: hostname_login
 
 ::: keypoints
 
-- "Snakemake generates and submits its own batch scripts for your scheduler."
-- "You can store default configuration settings in a Snakemake profile"
-- "`localrules` defines rules that are executed locally, and never submitted to a cluster."
+- "Snakemake genera y envía sus propios scripts por lotes para su planificador."
+- "Puedes almacenar parámetros de configuración por defecto en un perfil de Snakemake"
+- "`localrules` define reglas que son ejecutadas localmente, y nunca enviadas a un cluster."
 
 :::
+
+

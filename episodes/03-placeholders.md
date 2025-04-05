@@ -1,45 +1,37 @@
 ---
-title: "Placeholders"
+title: Marcadores de posición
 teaching: 40
 exercises: 30
 ---
 
+
 ::: questions
 
-- "How do I make a generic rule?"
+- "¿Cómo hago una regla genérica?"
 
 :::
 
 ::: objectives
 
-- "See how Snakemake deals with some errors"
+- "Mira cómo Snakemake trata algunos errores"
 
 :::
 
-Our Snakefile has some duplication. For example, the names of text
-files are repeated in places throughout the Snakefile rules. Snakefiles are
-a form of code and, in any code, repetition can lead to problems (e.g. we rename
-a data file in one part of the Snakefile but forget to rename it elsewhere).
+Nuestro Snakefile tiene algunos duplicados. Por ejemplo, los nombres de los archivos de texto se repiten en algunos lugares a lo largo de las reglas del Snakefile. Los Snakefiles son una forma de código y, en cualquier código, la repetición puede dar lugar a problemas (por ejemplo, renombramos un archivo de datos en una parte del Snakefile pero olvidamos renombrarlo en otro lugar).
 
 ::: callout
-## D.R.Y. (Don't Repeat Yourself)
 
-In many programming languages, the bulk of the language features are
-there to allow the programmer to describe long-winded computational
-routines as short, expressive, beautiful code.  Features in Python,
-R, or Java, such as user-defined variables and functions are useful in
-part because they mean we don't have to write out (or think about)
-all of the details over and over again.  This good habit of writing
-things out only once is known as the "Don't Repeat Yourself"
-principle or D.R.Y.
+## D.R.Y. (Don't Repeat Yourself) (No te repitas)
+
+En muchos lenguajes de programación, la mayor parte de las características del lenguaje están ahí para permitir al programador describir rutinas computacionales largas como código corto, expresivo y bonito. Las características de Python, R o Java, como las variables y funciones definidas por el usuario, son útiles en parte porque nos evitan tener que escribir (o pensar) en todos los detalles una y otra vez. Este buen hábito de escribir las cosas sólo una vez se conoce como el principio de "No te repitas" o D.R.Y. (por sus siglas en inglés).
+
 :::
 
-Let us set about removing some of the repetition from our Snakefile.
+Vamos a eliminar algunas de las repeticiones de nuestro archivo Snakefile.
 
-## Placeholders
+## Marcadores de posición
 
-To make a more general-purpose rule we need **placeholders**. Let's take a look
-at what a placeholder looks like
+Para hacer una regla más genérica necesitamos **marcadores de posición**. Veamos qué aspecto tiene un marcador de posición
 
 ```python
 rule hostname_remote:
@@ -50,7 +42,7 @@ rule hostname_remote:
 
 ```
 
-As a reminder, here's the previous version from the last episode:
+Como recordatorio, aquí está la versión anterior del último episodio:
 
 ```python
 rule hostname_remote:
@@ -61,24 +53,19 @@ rule hostname_remote:
 
 ```
 
-The new rule has replaced explicit file names with things in `{curly brackets}`,
-specifically `{output}` (but it could also have been `{input}`...if that had
-a value and were useful).
+La nueva regla ha reemplazado nombres de archivo explícitos con cosas en `{curly brackets}`, específicamente `{output}` (pero también podría haber sido `{input}`...si eso tuviera un valor y fuera útil).
 
-### `{input}` and `{output}` are **placeholders**
+### `{input}` y `{output}` son **marcadores de posición**
 
-Placeholders are used in the `shell` section of a rule, and Snakemake will
-replace them with appropriate values - `{input}` with the full name of the input
-file, and
-`{output}` with the full name of the output file -- before running the command.
+Los marcadores de posición se utilizan en la sección `shell` de una regla, y Snakemake los reemplazará con los valores apropiados - `{input}` con el nombre completo del archivo de entrada, y `{output}` con el nombre completo del archivo de salida - antes de ejecutar el comando.
 
-`{resources}` is also a placeholder, and we can access a named element of the
-`{resources}` with the notation `{resources.runtime}` (for example).
+`{resources}` también es un marcador de posición, y podemos acceder a un elemento con nombre del `{resources}` con la notación `{resources.runtime}` (por ejemplo).
 
 :::keypoints
 
-- "Snakemake rules are made more generic with placeholders"
-- "Placeholders in the shell part of the rule are replaced with values based on
-  the chosen wildcards"
+- "Las reglas de Snakemake se hacen más genéricas con marcadores de posición"
+- "Los marcadores de posición en la parte shell de la regla se sustituyen por valores basados en los comodines elegidos"
 
 :::
+
+
