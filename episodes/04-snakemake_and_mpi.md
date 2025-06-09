@@ -251,9 +251,8 @@ rule amdahl_run:
       "amdahl"
     resources:
       mpi="mpiexec",
-      # No direct way to access the wildcard in tasks, so we need to do this
-      # indirectly by declaring a short function that takes the wildcards as an
-      # argument
+      # No hay una forma directa de acceder al comodín en las tareas, así que necesitamos hacerlo
+      # de forma indirecta declarando una función breve que reciba los comodines como argumento
       tasks=lambda wildcards: int(wildcards.parallel_tasks)
     input:
     shell:
@@ -280,9 +279,8 @@ rule amdahl_run:
       "amdahl"
     resources:
       mpi="mpiexec",
-      # No direct way to access the wildcard in tasks, so we need to do this
-      # indirectly by declaring a short function that takes the wildcards as an
-      # argument
+      # No hay una forma directa de acceder al comodín en las tareas, así que necesitamos hacerlo
+      # de forma indirecta declarando una función breve que reciba los comodines como argumento
       tasks=lambda wildcards: int(wildcards.parallel_tasks)
     input:
     shell:
@@ -335,9 +333,8 @@ rule amdahl_run:
       "amdahl"
     resources:
       mpi="mpiexec",
-      # No direct way to access the wildcard in tasks, so we need to do this
-      # indirectly by declaring a short function that takes the wildcards as an
-      # argument
+      # No hay una forma directa de acceder al comodín en las tareas, así que necesitamos hacerlo
+      # de forma indirecta declarando una función breve que reciba los comodines como argumento
       tasks=lambda wildcards: int(wildcards.parallel_tasks)
     input:
     shell:
@@ -354,9 +351,8 @@ rule amdahl_run:
       "amdahl"
     resources:
       mpi="mpiexec",
-      # No direct way to access the wildcard in tasks, so we need to do this
-      # indirectly by declaring a short function that takes the wildcards as an
-      # argument
+      # No hay una forma directa de acceder al comodín en las tareas, así que necesitamos hacerlo
+      # de forma indirecta declarando una función breve que reciba los comodines como argumento
       tasks=lambda wildcards: int(wildcards.parallel_tasks)
     input:
     shell:
